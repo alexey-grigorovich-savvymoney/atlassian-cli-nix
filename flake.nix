@@ -27,19 +27,29 @@
         default = atlassian-cli;
       });
 
-      devShells = forAllSystems (pkgs: {
-        default = pkgs.mkShell {
-          inputsFrom = [ (pkgs.callPackage ./package.nix { }) ];
-          packages = [
-            pkgs.cargo
-            pkgs.rustc
-            pkgs.rustfmt
-            pkgs.clippy
-            pkgs.rust-analyzer
-          ];
-          RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
-        };
-      });
+      devShells = forAllSystems (
+        pkgs:
+        let
+          atlassian-cli = pkgs.callPackage ./package.nix { };
+        in
+        {
+          default = pkgs.mkShell {
+            # inputsFrom contributes the package's *build* inputs only, so the
+            # package itself is listed below to get the binary onto PATH (this
+            # is what `direnv`'s `use flake` picks up).
+            inputsFrom = [ atlassian-cli ];
+            packages = [
+              atlassian-cli
+              pkgs.cargo
+              pkgs.rustc
+              pkgs.rustfmt
+              pkgs.clippy
+              pkgs.rust-analyzer
+            ];
+            RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+          };
+        }
+      );
 
       formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
     };

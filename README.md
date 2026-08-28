@@ -19,11 +19,22 @@ Install into your profile:
 nix profile install .
 ```
 
-Development shell with `cargo`, `rustc`, `clippy`, `rustfmt` and `rust-analyzer`:
+Development shell, containing the `atlassian-cli` binary itself plus `cargo`, `rustc`,
+`clippy`, `rustfmt` and `rust-analyzer`:
 
 ```sh
 nix develop
 ```
+
+This is also what [direnv](https://direnv.net/) loads, so an `.envrc` of
+
+```sh
+use flake path/to/atlassian-cli-nix
+```
+
+puts `atlassian-cli` on `PATH` in that directory. Note that `use flake` always evaluates a
+devShell and never installs a package, which is why the shell lists the package explicitly
+rather than relying on `inputsFrom` (that would contribute only its build dependencies).
 
 ### As a flake input
 
@@ -46,7 +57,7 @@ nix develop
 | --- | --- |
 | `packages.<system>.atlassian-cli` | The CLI (also `packages.<system>.default`) |
 | `overlays.default` | Adds `atlassian-cli` to a nixpkgs instance |
-| `devShells.<system>.default` | Rust toolchain plus the package's build inputs |
+| `devShells.<system>.default` | The CLI, plus the Rust toolchain and the package's build inputs |
 | `formatter.<system>` | `nixfmt-rfc-style` |
 
 Systems: `x86_64-linux`, `aarch64-linux`, `x86_64-darwin`, `aarch64-darwin`.
